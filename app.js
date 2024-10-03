@@ -4,7 +4,7 @@ const teaRoutes = require("./routes/teaRoutes");
 // const userRoutes = require("./routes/userRoutes");
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 // Set view engine to EJS
 app.set('view engine', 'ejs');
@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files (e.g., CSS, images, etc.)
 app.use(express.static('public'));
 
-// Register your existing tour routes
+// Register your existing tea routes
 app.use('/', teaRoutes);
 
 // Register the login route
