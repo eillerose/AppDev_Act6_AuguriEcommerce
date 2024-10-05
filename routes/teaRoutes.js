@@ -8,5 +8,4 @@ router.get('/product', teaController.product);
 router.get('/service', teaController.service);
 router.get('/gallery', teaController.gallery);
 router.get('/contact', teaController.contact);
-
 module.exports = router;
