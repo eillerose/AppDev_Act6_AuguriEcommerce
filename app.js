@@ -1,27 +1,42 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const teaRoutes = require("./routes/teaRoutes"); 
-// const userRoutes = require("./routes/userRoutes");
-
+const express = require('express');
+const session = require('express-session');
+const sequelize = require('./config/db'); // Sequelize instance
+const path = require('path');
 const app = express();
-const PORT = 3000;
 
-// Set view engine to EJS
+// Set up EJS as the view engine
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-// Middleware for parsing form data
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// Serve static files (e.g., CSS, images, etc.)
-app.use(express.static('public'));
+sequelize.sync() // Sync all models with the database
+    .then(() => console.log('Models synchronized...'))
+    .catch(err => console.log('Error synchronizing models:', err));
 
-// Register your existing tour routes
-app.use('/', teaRoutes);
+app.use(session({
+  secret: 'auguri-secret-key',
+  resave: false,
+  saveUninitialized: true
+}));
 
-// Register the login route
-// app.use('/login', userRoutes);
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src')));
+
+// Routes
+const indexRoutes = require('./routes/index');
+const adminRoutes = require('./routes/admin');
+const productRoutes = require('./routes/product');
+
+app.use('/', indexRoutes);
+app.use('/admin', adminRoutes);
+app.use('/products', productRoutes);
 
 // Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server connected successfully to port ${PORT}...`);
+  console.log(`Server is running on port ${PORT}`);
 });
