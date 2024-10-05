@@ -16,7 +16,8 @@ const teaController = {
     },
     contact: (req, res) => {
         res.render('contact', { title: 'Contact Us' });
-    }
+    },
+  
   };
   
   module.exports = teaController;
