@@ -9,7 +9,7 @@ exports.login = (req, res) => {
     req.session.isAuthenticated = true;
     res.redirect('/admin/dashboard');
   } else {
-    res.render('index', { error: 'Invalid credentials' });
+    res.render('index', { title: 'Home', error: 'Invalid credentials' });
   }
 };
 

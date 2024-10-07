@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUGURI Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 60px;
+            --transition-speed: 0.3s;
+            --color-primary: #7D5531;
+            --color-secondary: #7E552F;
+            --color-accent: #B59979;
+            --color-light: #F1DDB8;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--color-light);
+        }
+
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-collapsed-width);
+            background-color: var(--color-primary);
+            transition: width var(--transition-speed) ease;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        #sidebar:hover {
+            width: var(--sidebar-width);
+        }
+
+        #sidebar .nav-link {
+            white-space: nowrap;
+            overflow: hidden;
+            color: var(--color-light);
+        }
+
+        #sidebar .nav-link i {
+            width: var(--sidebar-collapsed-width);
+            text-align: center;
+        }
+
+        #sidebar .nav-link span {
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        #sidebar:hover .nav-link span {
+            opacity: 1;
+        }
+
+        #sidebar .nav-link.active {
+            background-color: var(--color-secondary);
+            color: var(--color-light);
+        }
+
+        #content {
+            margin-left: var(--sidebar-collapsed-width);
+            transition: margin-left var(--transition-speed) ease;
+            background-color: var(--color-light);
+        }
+
+        #sidebar:hover + #content {
+            margin-left: var(--sidebar-width);
+        }
+
+        .card {
+            transition: transform 0.2s ease;
+            background-color: white;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: var(--color-secondary);
+        }
+
+        .brand-name {
+            color: var(--color-light);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        #sidebar:not(:hover) .brand-name {
+            display: none;
+        }
+
+        .bg-primary {
+            background-color: var(--color-primary) !important;
+        }
+
+        .bg-secondary {
+            background-color: var(--color-secondary) !important;
+        }
+
+        .bg-accent {
+            background-color: var(--color-accent) !important;
+        }
+
+        .text-primary {
+            color: var(--color-primary) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <nav id="sidebar">
+            <div class="brand-container">
+                <i class="fas fa-mug-hot fa-3x" style="color: var(--color-light);"></i>
+                <span class="brand-name">AUGURI</span>
+            </div>
+            <ul class="nav flex-column mt-4">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard"><i class="fas fa-tachometer-alt fa-2x"></i> <span>Dashboard</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/orders"><i class="fas fa-shopping-cart fa-2x"></i> <span>Orders</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products"><i class="fas fa-ice-cream fa-2x"></i> <span>Products</span></a>
+                </li>
+            </ul>
+        </nav>
+
+        <main id="content" class="flex-grow-1 p-4">
+            <h1 class="mb-4 text-primary">AUGURI Orders</h1>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search orders...">
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                        <i class="fas fa-plus me-2"></i>Add Order
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Order Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1001</td>
+                            <td>John Doe</td>
+                            <td>2023-05-15</td>
+                            <td>$75.50</td>
+                            <td><span class="badge bg-success">Completed</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editOrderModal" data-id="1001" data-customer="John Doe" data-date="2023-05-15" data-amount="75.50" data-status="Completed">Edit</button>
+                                <form action="/orders/delete/1001" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?');" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1002</td>
+                            <td>Jane Smith</td>
+                            <td>2023-05-16</td>
+                            <td>$120.00</td>
+                            <td><span class="badge bg-warning text-dark">Pending</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editOrderModal" data-id="1002" data-customer="Jane Smith" data-date="2023-05-16" data-amount="120.00" data-status="Pending">Edit</button>
+                                <form action="/orders/delete/1002" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?');" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1003</td>
+                            <td>Bob Johnson</td>
+                            <td>2023-05-17</td>
+                            <td>$95.25</td>
+                            <td><span class="badge bg-info">Processing</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editOrderModal" data-id="1003" data-customer="Bob Johnson" data-date="2023-05-17" data-amount="95.25" data-status="Processing">Edit</button>
+                                <form action="/orders/delete/1003" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?');" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="Order pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </main>
+    </div>
+
+    <!-- Add Order Modal -->
+    <div class="modal fade" id="addOrderModal" tabindex="-1" aria-labelledby="addOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addOrderModalLabel">Add Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addOrderForm" action="/orders/add" method="POST">
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" id="customerName" name="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="orderDate" class="form-label">Order Date</label>
+                            <input type="date" class="form-control" id="orderDate" name="orderDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalAmount" class="form-label">Total Amount</label>
+                            <input type="number" class="form-control" id="totalAmount" name="totalAmount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="addOrderForm" class="btn btn-primary">Add Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Order Modal -->
+    <div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editOrderModalLabel">Edit Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editOrderForm" action="" method="POST">
+                        <input type="hidden" id="editOrderId" name="id">
+                        <div class="mb-3">
+                            <label for="editCustomerName" class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" id="editCustomerName" name="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editOrderDate" class="form-label">Order Date</label>
+                            <input type="date" class="form-control" id="editOrderDate" name="orderDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTotalAmount" class="form-label">Total Amount</label>
+                            <input type="number" class="form-control" id="editTotalAmount" name="totalAmount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label">Status</label>
+                            <select class="form-select" id="editStatus" name="status" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="editOrderForm" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Populate edit modal with order data
+        $('#editOrderModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var customer = button.data('customer');
+            var date = button.data('date');
+            var amount = button.data('amount');
+            var status = button.data('status');
+
+            var modal = $(this);
+            modal.find('#editOrderId').val(id);
+            modal.find('#editCustomerName').val(customer);
+            modal.find('#editOrderDate').val(date);
+            modal.find('#editTotalAmount').val(amount);
+            modal.find('#editStatus').val(status);
+
+            modal.find('#editOrderForm').attr('action', `/orders/edit/${id}`);
+        });
+
+        //  Search functionality
+        $(document).ready(function() {
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("table tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</body>
+</html>

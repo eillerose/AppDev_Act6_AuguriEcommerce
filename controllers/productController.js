@@ -1,27 +1,38 @@
 const Product = require('../models/product');
+const { Op } = require('sequelize');
 
-
-exports.getProductCount = async (req, res) => {
-    try {
-        const productCount = await Product.count(); // Fetch the product count from the database
-        // Make sure you're passing the variable when rendering the view
-        res.render('admin/dashboard', { productCount }); 
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
-    }
-};
-
-// Controller to fetch all products and render the view
 exports.renderProductsPage = async (req, res) => {
     try {
-        // Fetch all products from the database
-        const products = await Product.findAll();
-        
-        // Render the products page and pass the product data
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Number of items per page
+        const search = req.query.search || '';
+
+        const offset = (page - 1) * limit;
+
+        const whereClause = search
+            ? {
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { category: { [Op.like]: `%${search}%` } }
+                ]
+            }
+            : {};
+
+        const { count, rows: products } = await Product.findAndCountAll({
+            where: whereClause,
+            limit: limit,
+            offset: offset,
+            order: [['id', 'ASC']]
+        });
+
+        const totalPages = Math.ceil(count / limit);
+
         res.render('admin/products', {
-            title: 'Product List', // Page title
-            products              // Pass products to the view
+            title: 'Product List',
+            products: products,
+            currentPage: page,
+            totalPages: totalPages,
+            search: search
         });
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -29,25 +40,26 @@ exports.renderProductsPage = async (req, res) => {
     }
 };
 
-// Controller to handle adding a new product
 exports.addProduct = async (req, res) => {
     try {
         const { name, category, price, stock } = req.body;
 
-        // Validate that all required fields are provided
         if (!name || !category || !price || !stock) {
             return res.status(400).send("All fields are required");
         }
 
-        // Create a new product in the database
+        // Handle image upload
+        const image = req.file ? req.file.filename : null;
+
         await Product.create({
             name,
             category,
             price: parseFloat(price),
             stock: parseInt(stock),
+            image // Save image filename to database
         });
 
-        // Redirect to the products page after successfully adding the product
+
         res.redirect('/products');
     } catch (error) {
         console.error("Error adding product:", error);
@@ -55,48 +67,43 @@ exports.addProduct = async (req, res) => {
     }
 };
 
-// Function to handle the form submission and update the product in the database
 exports.updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const { name, category, price, stock } = req.body;
+        
+        // Prepare updated data
+        let updatedData = { name, category, price, stock };
 
+        // Find the product by ID
         const product = await Product.findByPk(productId);
-
         if (!product) {
             return res.status(404).send('Product not found');
         }
 
-        // Update product details
-        await product.update({
-            name,
-            category,
-            price,
-            stock
-        });
+        // If an image is uploaded, update the image field
+        if (req.file) {
+            updatedData.image = req.file.filename;  // Multer stores the image filename in `req.file.filename`
+        }
 
-        // Redirect back to the product list or wherever appropriate
-        res.redirect('/products');
-    } catch (err) {
-        console.error('Error updating product:', err);
-        res.status(500).send('Server error');
+        // Update product with the new data
+        await product.update(updatedData);
+
+        res.redirect('/products'); // Redirect to product list or another desired page
+    } catch (error) {
+        console.error('Error updating product:', error);
+        res.status(500).send('Error updating product');
     }
 };
-
-
-// Controller function to delete a product
 
 exports.deleteProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         await Product.destroy({ where: { id: productId } });
-        res.redirect('/products'); // Redirect to the product list or any other page
+        res.redirect('/products');
     } catch (error) {
         console.error('Error deleting product:', error);
         res.status(500).send('Internal Server Error');
     }
 };
-
-
-
 
