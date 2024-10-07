@@ -51,11 +51,10 @@ app.use('/products', productRoutes);
 app.use('/', teaRoutes);
 app.use('/user', userRoutes);
 app.use('/order', orderRoutes);
-app.use('/', cartRoutes);
-
+app.use('/cart',cartRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log('Server is running on port ${PORT}');
 });
